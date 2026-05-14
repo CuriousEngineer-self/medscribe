@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedScribe — Clinical Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- LOGIN PAGE -->
+  <div id="page-login" class="page active">
+    <div class="auth-bg">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <span class="logo-icon">⚕</span>
+          <h1>MedScribe</h1>
+          <p>Clinical Management System</p>
+        </div>
+        <div id="auth-form-container">
+          <!-- Login Form -->
+          <div id="login-form">
+            <h2>Sign In</h2>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="login-email" placeholder="doctor@hospital.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <div class="form-error" id="login-error"></div>
+            <button class="btn btn-primary btn-full" onclick="login()">Sign In</button>
+            <div class="auth-links">
+              <a href="#" onclick="showForgot()">Forgot password?</a>
+              <a href="#" onclick="showRegister()">Create account</a>
+            </div>
+          </div>
+          <!-- Register Form -->
+          <div id="register-form" style="display:none">
+            <h2>Create Account</h2>
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="reg-name" placeholder="Dr. Jane Smith">
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="reg-email" placeholder="doctor@hospital.com">
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="reg-password" placeholder="Min. 8 characters">
+            </div>
+            <div class="form-error" id="reg-error"></div>
+            <button class="btn btn-primary btn-full" onclick="register()">Create Account</button>
+            <div class="auth-links"><a href="#" onclick="showLogin()">Back to sign in</a></div>
+          </div>
+          <!-- Forgot Password Form -->
+          <div id="forgot-form" style="display:none">
+            <h2>Reset Password</h2>
+            <p class="form-hint">Enter your email address and we'll send you a reset link.</p>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="forgot-email" placeholder="doctor@hospital.com">
+            </div>
+            <div class="form-error" id="forgot-error"></div>
+            <div class="form-success" id="forgot-success"></div>
+            <button class="btn btn-primary btn-full" onclick="forgotPassword()">Send Reset Link</button>
+            <div class="auth-links"><a href="#" onclick="showLogin()">Back to sign in</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESET PASSWORD PAGE -->
+  <div id="page-reset" class="page">
+    <div class="auth-bg">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <span class="logo-icon">⚕</span>
+          <h1>MedScribe</h1>
+        </div>
+        <h2>Set New Password</h2>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="reset-password" placeholder="Min. 8 characters">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="reset-confirm" placeholder="Repeat password">
+        </div>
+        <div class="form-error" id="reset-error"></div>
+        <div class="form-success" id="reset-success"></div>
+        <button class="btn btn-primary btn-full" onclick="resetPassword()">Reset Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="page-app" class="page">
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo-icon">⚕</span>
+        <span class="sidebar-title">MedScribe</span>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="#" class="nav-item" data-view="dashboard" onclick="showView('dashboard')"><span class="nav-icon">◫</span><span>Dashboard</span></a></li>
+        <li><a href="#" class="nav-item" data-view="patients" onclick="showView('patients')"><span class="nav-icon">👤</span><span>Patients</span></a></li>
+        <li><a href="#" class="nav-item" data-view="visits" onclick="showView('visits')"><span class="nav-icon">📋</span><span>Visits</span></a></li>
+        <li><a href="#" class="nav-item" data-view="profile" onclick="showView('profile')"><span class="nav-icon">⚙</span><span>Profile & Config</span></a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <div class="doctor-badge" id="doctor-badge"></div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <!-- DASHBOARD -->
+      <div id="view-dashboard" class="view">
+        <div class="page-header">
+          <div>
+            <h1 id="dash-greeting">Welcome back</h1>
+            <p class="page-sub">Here's your practice at a glance</p>
+          </div>
+          <button class="btn btn-primary" onclick="showView('patients'); openNewPatient()">+ New Patient</button>
+        </div>
+        <div class="stats-grid" id="stats-grid"></div>
+        <div class="dash-grid">
+          <div class="card">
+            <h3>Recent Patients</h3>
+            <div id="recent-patients-list" class="recent-list"></div>
+          </div>
+          <div class="card">
+            <h3>Quick Actions</h3>
+            <div class="quick-actions">
+              <button class="qa-btn" onclick="showView('patients'); openNewPatient()">
+                <span>👤</span>
+                <span>Add Patient</span>
+              </button>
+              <button class="qa-btn" onclick="showView('visits'); openNewVisit()">
+                <span>📋</span>
+                <span>New Visit</span>
+              </button>
+              <button class="qa-btn" onclick="showView('profile'); document.getElementById('tab-schemas').click()">
+                <span>⚙</span>
+                <span>Configure Parameters</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PATIENTS -->
+      <div id="view-patients" class="view" style="display:none">
+        <div class="page-header">
+          <div>
+            <h1>Patients</h1>
+            <p class="page-sub">Manage your patient records</p>
+          </div>
+          <button class="btn btn-primary" onclick="openNewPatient()">+ New Patient</button>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="patient-search" placeholder="Search by name or phone..." oninput="searchPatients(this.value)">
+        </div>
+        <div id="patients-list" class="patients-grid"></div>
+      </div>
+
+      <!-- PATIENT DETAIL -->
+      <div id="view-patient-detail" class="view" style="display:none">
+        <div class="page-header">
+          <button class="btn btn-back" onclick="showView('patients')">← Back</button>
+          <div style="flex:1">
+            <h1 id="pd-name">Patient Name</h1>
+            <p class="page-sub" id="pd-sub"></p>
+          </div>
+          <button class="btn btn-secondary" onclick="openEditPatient()">Edit Patient</button>
+          <button class="btn btn-primary" onclick="openNewVisitForPatient()">+ New Visit</button>
+        </div>
+        <div class="detail-grid">
+          <div class="card patient-info-card" id="pd-info-card"></div>
+          <div class="card">
+            <div class="card-header-row">
+              <h3>Visit History</h3>
+              <div class="visit-filter">
+                <input type="date" id="visit-from" onchange="loadPatientVisits()">
+                <span>to</span>
+                <input type="date" id="visit-to" onchange="loadPatientVisits()">
+              </div>
+            </div>
+            <div id="patient-visits-list"></div>
+          </div>
+          <div class="card span-2">
+            <div class="card-header-row">
+              <h3>Parameter Trends</h3>
+              <select id="trend-param-select" onchange="loadTrendChart()">
+                <option value="">Select parameter...</option>
+              </select>
+            </div>
+            <div class="chart-container">
+              <canvas id="trend-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISITS -->
+      <div id="view-visits" class="view" style="display:none">
+        <div class="page-header">
+          <div>
+            <h1>All Visits</h1>
+            <p class="page-sub">Browse all patient visits</p>
+          </div>
+          <button class="btn btn-primary" onclick="openNewVisit()">+ New Visit</button>
+        </div>
+        <div id="all-visits-list" class="visits-list"></div>
+      </div>
+
+      <!-- PROFILE & CONFIG -->
+      <div id="view-profile" class="view" style="display:none">
+        <div class="page-header">
+          <div>
+            <h1>Profile & Configuration</h1>
+            <p class="page-sub">Manage your practice settings</p>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab active" id="tab-profile" onclick="switchTab('profile')">Doctor Profile</button>
+          <button class="tab" id="tab-schemas" onclick="switchTab('schemas')">Patient Parameters</button>
+          <button class="tab" id="tab-preview" onclick="switchTab('preview')">Letterhead Preview</button>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="tab-content-profile" class="tab-content">
+          <div class="card form-card">
+            <h3>Practice Information</h3>
+            <p class="form-hint">This information appears on every prescription letterhead.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="prof-name" placeholder="Dr. Jane Smith">
+              </div>
+              <div class="form-group">
+                <label>Qualifications</label>
+                <input type="text" id="prof-qualifications" placeholder="MBBS, MD, DM">
+              </div>
+              <div class="form-group">
+                <label>Specialization</label>
+                <input type="text" id="prof-specialization" placeholder="Cardiology">
+              </div>
+              <div class="form-group">
+                <label>Medical License #</label>
+                <input type="text" id="prof-license" placeholder="MCI-12345">
+              </div>
+              <div class="form-group">
+                <label>Hospital / Clinic Name</label>
+                <input type="text" id="prof-hospital" placeholder="City Heart Institute">
+              </div>
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="prof-phone" placeholder="+91 98765 43210">
+              </div>
+              <div class="form-group span-2">
+                <label>Hospital Address</label>
+                <textarea id="prof-address" rows="2" placeholder="123 Medical Blvd, City, State - 000000"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Emergency Contact</label>
+                <input type="text" id="prof-emergency" placeholder="+91 98765 00000">
+              </div>
+              <div class="form-group span-2">
+                <label>Signature Note / Tagline</label>
+                <input type="text" id="prof-signature" placeholder="Consultation by appointment only">
+              </div>
+            </div>
+            <div class="form-error" id="profile-error"></div>
+            <div class="form-success" id="profile-success"></div>
+            <button class="btn btn-primary" onclick="saveProfile()">Save Profile</button>
+          </div>
+        </div>
+
+        <!-- Schemas Tab -->
+        <div id="tab-content-schemas" class="tab-content" style="display:none">
+          <div class="card">
+            <div class="card-header-row">
+              <div>
+                <h3>Patient Parameter Schemas</h3>
+                <p class="form-hint">Define what clinical parameters to track for your patients.</p>
+              </div>
+              <button class="btn btn-primary" onclick="openSchemaModal()">+ Add Parameter</button>
+            </div>
+            <div id="schemas-list"></div>
+          </div>
+        </div>
+
+        <!-- Letterhead Preview -->
+        <div id="tab-content-preview" class="tab-content" style="display:none">
+          <div class="card">
+            <h3>Prescription Letterhead Preview</h3>
+            <div class="letterhead-preview" id="letterhead-preview-box"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL OVERLAY -->
+  <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" id="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- PRINT AREA (hidden) -->
+  <div id="print-area" style="display:none"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/patients.js"></script>
+  <script src="/js/visits.js"></script>
+  <script src="/js/schemas.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/print.js"></script>
+</body>
+</html>
